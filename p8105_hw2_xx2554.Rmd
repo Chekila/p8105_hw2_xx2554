@@ -115,7 +115,7 @@ n_a_ada_stations =
 
 ## Problem 2
 
-### Import and clean data
+### Mr. Trash Wheel
 
 ```{r}
 mr_trash_df = 
@@ -131,4 +131,30 @@ mr_trash_df =
     trash_wheel = "mr_trash_wheel")
 
 mr_trash_df
+```
+
+### Professor Trash Wheel and Gwynnda
+
+```{r}
+professor_trash_df = 
+  read_excel(
+    "./data/202610 Trash Wheel Collection Data.xlsx",
+    sheet = "Professor Trash Wheel",
+    range = "A2:M140",
+    na = c("", "NA", "dive")) |>  
+  janitor::clean_names() |> 
+  drop_na(dumpster) |> 
+  mutate(trash_wheel = "professor_trash_wheel")
+
+gwynnda_trash_df = 
+  read_excel(
+    "./data/202610 Trash Wheel Collection Data.xlsx",
+    sheet = "Gwynnda the Good Wheel of the W",
+    range = "A2:L395") |> 
+  janitor::clean_names() |> 
+  drop_na(dumpster) |> 
+  mutate(trash_wheel = "gwynnda")
+
+professor_trash_df
+gwynnda_trash_df
 ```
