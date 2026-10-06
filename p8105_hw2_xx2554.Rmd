@@ -158,3 +158,15 @@ gwynnda_trash_df =
 professor_trash_df
 gwynnda_trash_df
 ```
+
+
+### Combine datasets
+
+```{r}
+trash_wheel_df = 
+  bind_rows(mr_trash_df, professor_trash_df, gwynnda_trash_df) |> 
+  mutate(month = str_to_title(str_trim(month))) |> 
+  select(trash_wheel, everything())
+
+trash_wheel_df
+```
