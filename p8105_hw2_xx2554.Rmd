@@ -220,9 +220,32 @@ baseline_df =
 baseline_df
 ```
 
+### Baseline description and questions
 
+```{r}
+n_recruited = nrow(baseline_all_df)
 
+n_eligible = nrow(baseline_df)
 
+n_develop_mci = 
+  baseline_df |> 
+  drop_na(age_at_onset) |> 
+  nrow()
+
+mean_baseline_age = 
+  baseline_df |> 
+  pull(current_age) |> 
+  mean()
+
+prop_women_apoe4 = 
+  baseline_df |> 
+  filter(sex == "female") |> 
+  mutate(is_carrier = apoe4 == "carrier") |> 
+  pull(is_carrier) |> 
+  mean()
+```
+
+The baseline data were imported with `skip = 1` (the first row contains variable descriptions) and with `.` treated as missing, since age at onset is recorded as `.` for participants who remained MCI free. `sex` and `apoe4` were converted from 1/0 codes to labeled factors. Each row is one participant, with variables including baseline age, sex, education, APOE4 status, and age at MCI onset. A total of `r n_recruited` participants were recruited; `r n_recruited - n_eligible` were removed because their age at onset was at or before their baseline age (i.e. they already had MCI), leaving `r n_eligible` participants, of whom `r n_develop_mci` developed MCI during follow-up. The average baseline age is `r round(mean_baseline_age, 2)` years, and `r round(prop_women_apoe4 * 100, 1)`% of women are APOE4 carriers.
 
 
 
