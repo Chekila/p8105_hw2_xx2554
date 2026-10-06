@@ -111,3 +111,24 @@ n_a_ada_stations =
 ```
 
 `r n_a_stations` distinct stations serve the A train, and `r n_a_ada_stations` of these are ADA compliant.
+
+
+## Problem 2
+
+### Import and clean data
+
+```{r}
+mr_trash_df = 
+  read_excel(
+    "./data/202610 Trash Wheel Collection Data.xlsx",
+    sheet = "Mr. Trash Wheel",
+    range = "A2:N743") |> 
+  janitor::clean_names() |> 
+  drop_na(dumpster) |> 
+  mutate(
+    sports_balls = as.integer(round(sports_balls)),
+    year = as.numeric(year),
+    trash_wheel = "mr_trash_wheel")
+
+mr_trash_df
+```
