@@ -41,3 +41,73 @@ transit_df
 
 This dataset contains information on each entrance and exit of the NYC subway system, so each row represents one entrance or exit rather than one station. The cleaned dataset includes line, station name, station latitude and longitude, the routes served (`route1` to `route11`), entry, vending, entrance type, and ADA compliance. To clean the data, I imported the CSV using a relative path (reading `route8` to `route11` as character so all route columns have the same type), cleaned variable names with `janitor::clean_names()`, kept the variables of interest with `select`, and converted `entry` from `YES`/`NO` to a logical variable using `case_match`. The resulting dataset has `r nrow(transit_df)` rows and `r ncol(transit_df)` columns. These data are not tidy: route served is a single variable, but it is spread across 11 columns with the route number stored in the column names, and most of these columns are missing because most stations serve only a few routes.
 
+### Distinct stations
+
+```{r}
+n_stations = 
+  transit_df |> 
+  distinct(line, station_name) |> 
+  nrow()
+```
+
+There are `r n_stations` distinct stations, identified by both station name and line.
+
+### ADA compliant stations
+
+```{r}
+n_ada_stations = 
+  transit_df |> 
+  filter(ada == TRUE) |> 
+  distinct(line, station_name) |> 
+  nrow()
+```
+
+`r n_ada_stations` stations are ADA compliant.
+
+### Entrances without vending that allow entrance
+
+```{r}
+prop_entry_no_vending = 
+  transit_df |> 
+  filter(vending == "NO") |> 
+  pull(entry) |> 
+  mean()
+```
+
+Among station entrances / exits without vending (counted at the entrance level, not the station level), `r round(prop_entry_no_vending * 100, 1)`% allow entrance.
+
+### Reformatting routes
+
+```{r}
+transit_tidy_df = 
+  transit_df |> 
+  pivot_longer(
+    route1:route11,
+    names_to = "route_number",
+    names_prefix = "route",
+    values_to = "route_name") |> 
+  drop_na(route_name) |> 
+  mutate(route_number = as.numeric(route_number))
+
+transit_tidy_df
+```
+
+The reformatted dataset has one row for each route served at each entrance / exit, with `route_number` and `route_name` as separate variables (`r nrow(transit_tidy_df)` rows and `r ncol(transit_tidy_df)` columns).
+
+### Stations serving the A train
+
+```{r}
+n_a_stations = 
+  transit_tidy_df |> 
+  filter(route_name == "A") |> 
+  distinct(line, station_name) |> 
+  nrow()
+
+n_a_ada_stations = 
+  transit_tidy_df |> 
+  filter(route_name == "A", ada == TRUE) |> 
+  distinct(line, station_name) |> 
+  nrow()
+```
+
+`r n_a_stations` distinct stations serve the A train, and `r n_a_ada_stations` of these are ADA compliant.
