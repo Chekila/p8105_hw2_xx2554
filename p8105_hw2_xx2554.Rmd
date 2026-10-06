@@ -272,3 +272,36 @@ amyloid_df
 The amyloid data were imported with `skip = 1` (descriptive first row) and with both `NA` and `Na` treated as missing, since the file uses both spellings. The data were originally in wide format with one column per visit, so I used `pivot_longer` to create one row per participant per visit, with `time` as years since baseline (0, 2, 4, 6, 8). The tidy dataset has `r nrow(amyloid_df)` rows covering `r n_distinct(amyloid_df$id)` participants, with `r sum(is.na(amyloid_df$amyloid_ratio))` missing measurements.
 
 
+### Checking participants across datasets
+
+```{r}
+only_baseline = 
+  anti_join(baseline_df, amyloid_df, by = "id")
+
+only_amyloid = 
+  amyloid_df |> 
+  distinct(id) |> 
+  anti_join(baseline_df, by = "id")
+
+n_amyloid_excluded = 
+  only_amyloid |> 
+  filter(id %in% baseline_all_df$id) |> 
+  nrow()
+
+only_baseline
+only_amyloid
+```
+
+There are `r nrow(only_baseline)` eligible participants in the baseline data who have no amyloid measurements (IDs `r only_baseline$id`). There are also `r nrow(only_amyloid)` participants who only appear in the amyloid data. Of these, `r n_amyloid_excluded` are the participants I removed earlier for having MCI at baseline, and the other `r nrow(only_amyloid) - n_amyloid_excluded` do not appear in the baseline file at all. Because of this, I only kept participants who are in both datasets when combining them.
+
+### Combined dataset
+
+```{r}
+mci_df = 
+  inner_join(baseline_df, amyloid_df, by = "id")
+
+mci_df
+
+write_csv(mci_df, "./data/data_mci/mci_combined.csv")
+```
+The combined dataset keeps only participants in both datasets and has `r nrow(mci_df)` rows for `r n_distinct(mci_df$id)` participants, with one row per participant per visit. I exported it as a CSV to the data directory.
