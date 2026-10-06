@@ -247,5 +247,28 @@ prop_women_apoe4 =
 
 The baseline data were imported with `skip = 1` (the first row contains variable descriptions) and with `.` treated as missing, since age at onset is recorded as `.` for participants who remained MCI free. `sex` and `apoe4` were converted from 1/0 codes to labeled factors. Each row is one participant, with variables including baseline age, sex, education, APOE4 status, and age at MCI onset. A total of `r n_recruited` participants were recruited; `r n_recruited - n_eligible` were removed because their age at onset was at or before their baseline age (i.e. they already had MCI), leaving `r n_eligible` participants, of whom `r n_develop_mci` developed MCI during follow-up. The average baseline age is `r round(mean_baseline_age, 2)` years, and `r round(prop_women_apoe4 * 100, 1)`% of women are APOE4 carriers.
 
+### Amyloid biomarker data
+
+```{r}
+amyloid_df = 
+  read_csv(
+    "./data/data_mci/mci_amyloid.csv",
+    skip = 1,
+    na = c("NA", "Na", "")) |> 
+  janitor::clean_names() |> 
+  rename(id = study_id) |> 
+  pivot_longer(
+    baseline:time_8,
+    names_to = "time",
+    names_prefix = "time_",
+    values_to = "amyloid_ratio") |> 
+  mutate(
+    time = replace(time, time == "baseline", "0"),
+    time = as.numeric(time))
+
+amyloid_df
+```
+
+The amyloid data were imported with `skip = 1` (descriptive first row) and with both `NA` and `Na` treated as missing, since the file uses both spellings. The data were originally in wide format with one column per visit, so I used `pivot_longer` to create one row per participant per visit, with `time` as years since baseline (0, 2, 4, 6, 8). The tidy dataset has `r nrow(amyloid_df)` rows covering `r n_distinct(amyloid_df$id)` participants, with `r sum(is.na(amyloid_df$amyloid_ratio))` missing measurements.
 
 
