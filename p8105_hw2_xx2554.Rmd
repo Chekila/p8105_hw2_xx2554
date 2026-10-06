@@ -9,3 +9,35 @@ date: "2026-10-05"
 library(tidyverse)
 library(readxl)
 ```
+
+## Problem 1
+
+```{r}
+transit_df = 
+  read_csv(
+    "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
+    col_types = cols(
+      Route8 = col_character(),
+      Route9 = col_character(),
+      Route10 = col_character(),
+      Route11 = col_character()
+    )
+  ) |> 
+  janitor::clean_names() |> 
+  select(
+    line, station_name, station_latitude, station_longitude,
+    starts_with("route"), entry, vending, entrance_type, ada
+  ) |> 
+  mutate(
+    entry = case_match(
+      entry,
+      "YES" ~ TRUE,
+      "NO" ~ FALSE
+    ))
+
+transit_df
+```
+
+
+This dataset contains information on each entrance and exit of the NYC subway system, so each row represents one entrance or exit rather than one station. The cleaned dataset includes line, station name, station latitude and longitude, the routes served (`route1` to `route11`), entry, vending, entrance type, and ADA compliance. To clean the data, I imported the CSV using a relative path (reading `route8` to `route11` as character so all route columns have the same type), cleaned variable names with `janitor::clean_names()`, kept the variables of interest with `select`, and converted `entry` from `YES`/`NO` to a logical variable using `case_match`. The resulting dataset has `r nrow(transit_df)` rows and `r ncol(transit_df)` columns. These data are not tidy: route served is a single variable, but it is spread across 11 columns with the route number stored in the column names, and most of these columns are missing because most stations serve only a few routes.
+
